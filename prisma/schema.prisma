@@ -1,74 +1,375 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-    provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {
-    provider = "postgresql"
-    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
-}
-
-// Necessary for Next auth
 model Account {
-    id                       String  @id @default(cuid())
-    userId                   String
-    type                     String
-    provider                 String
-    providerAccountId        String
-    refresh_token            String? // @db.Text
-    access_token             String? // @db.Text
-    expires_at               Int?
-    token_type               String?
-    scope                    String?
-    id_token                 String? // @db.Text
-    session_state            String?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    refresh_token_expires_in Int?
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+  refresh_token_expires_in Int?
 
-    @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-    @@unique([identifier, token])
+  @@unique([identifier, token])
+}
+
+model campaign {
+  id                          Int                           @id
+  user_id                     Int
+  created_at                  DateTime
+  updated_at                  DateTime
+  last_updated                DateTime                      @default(dbgenerated("'2022-12-23 00:00:00'::timestamp without time zone"))
+  total_leads                 Int                           @default(1)
+  offset                      Int                           @default(0)
+  status                      String
+  name                        String
+  track_settings              Json
+  scheduler_cron_value        Json
+  min_time_btwn_emails        Int
+  max_leads_per_day           Int
+  stop_lead_settings          String
+  unsubscribe_text            String?
+  client_id                   Int?
+  enable_ai_esp_matching      Boolean
+  send_as_plain_text          Boolean
+  follow_up_percentage        Int
+  lead_message_category_queue lead_message_category_queue[]
+  lead_message_histories      lead_message_history[]        @relation("CampaignLeadMessageHistories")
+  email_accounts              email_account[]               @relation("campaignToemail_account")
+  leads                       lead[]                        @relation("campaignTolead")
+
+  @@index([status])
+  @@index([name])
+}
+
+enum LeadStatus {
+  NONE
+  INTERESTED
+  REPLIED
+  SCHEDULED_CALL
+  DONT_CONTACT
+  NOT_HIRING
+  NO_AGENCIES
+  TIMING
+  NOT_INTERESTED
+}
+
+model lead {
+  id                               Int                           @id
+  created_at                       DateTime
+  first_name                       String?
+  last_name                        String?
+  email                            String
+  phone_number                     String?
+  company_name                     String?
+  website                          String?
+  location                         String?
+  custom_fields                    Json?
+  linkedin_profile                 String?
+  company_url                      String?
+  last_contacted_at                DateTime?
+  reminder_at                      DateTime?
+  first_contacted_at               DateTime?
+  last_metrics_snapshot            DateTime?
+  metrics_snapshot_campaigns_count Int?
+  metrics_snapshot_messages_count  Int?
+  company_id                       Int?
+  status                           LeadStatus                    @default(NONE)
+  company                          company?                      @relation(fields: [company_id], references: [id])
+  lead_message_category_queue      lead_message_category_queue[]
+  lead_message_histories           lead_message_history[]        @relation("LeadMessageHistories")
+  campaigns                        campaign[]                    @relation("campaignTolead")
+
+  @@index([email])
+  @@index([company_name])
+  @@index([first_name])
+  @@index([last_name])
+  @@index([last_contacted_at])
+  @@index([reminder_at])
+  @@index([first_contacted_at])
+  @@index([last_metrics_snapshot])
+  @@index([metrics_snapshot_campaigns_count])
+  @@index([metrics_snapshot_messages_count])
+  @@index([company_id])
+  @@index([status])
+}
+
+model email_account {
+  id                         Int        @id
+  created_at                 DateTime
+  updated_at                 DateTime
+  user_id                    Int
+  from_name                  String
+  from_email                 String
+  username                   String
+  smtp_host                  String?
+  smtp_port                  Int?
+  smtp_port_type             String?
+  message_per_day            Int
+  different_reply_to_address String?
+  is_different_imap_account  Boolean
+  imap_username              String?
+  imap_host                  String?
+  imap_port                  Int?
+  imap_port_type             String?
+  signature                  String?
+  custom_tracking_domain     String?
+  bcc_email                  String?
+  is_smtp_success            Boolean
+  is_imap_success            Boolean
+  smtp_failure_error         String?
+  imap_failure_error         String?
+  type                       String?
+  daily_sent_count           Int?
+  campaigns                  campaign[] @relation("campaignToemail_account")
+}
+
+model lead_message_history {
+  id               Int      @id @default(autoincrement())
+  from             String?
+  to               String?
+  cc               String[] @default([])
+  stats_id         String
+  type             String
+  message_id       String
+  email_body       String
+  subject          String
+  email_seq_number String?
+  open_count       Int?
+  click_count      Int?
+  click_details    Json?
+  campaign_id      Int
+  lead_id          Int
+  time             DateTime
+  is_archived      Boolean  @default(false)
+  is_read          Boolean  @default(false)
+  is_valid         Boolean  @default(true)
+  campaign         campaign @relation("CampaignLeadMessageHistories", fields: [campaign_id], references: [id])
+  lead             lead     @relation("LeadMessageHistories", fields: [lead_id], references: [id])
+
+  @@index([lead_id])
+  @@index([campaign_id, lead_id])
+  @@index([time])
+  @@index([is_valid, time])
+  @@index([is_valid, lead_id, campaign_id])
+  @@index([message_id, is_valid])
+  @@index([is_archived])
+  @@index([lead_id, is_archived, is_valid])
+}
+
+model lead_cursor {
+  id           Int      @id
+  offset       Int      @default(0)
+  has_more     Boolean  @default(false)
+  last_updated DateTime @updatedAt
+}
+
+model message_history_cursor {
+  last_updated     DateTime @default(dbgenerated("'2022-12-23 00:00:00'::timestamp without time zone"))
+  campaign_lead_id String   @unique
+}
+
+model lead_message_category_queue {
+  id           Int      @id @default(autoincrement())
+  lead_id      Int
+  campaign_id  Int
+  last_updated DateTime
+  category     Int      @default(0)
+  status       String   @default("ACTIVE")
+  fetch_times  Int      @default(0)
+  campaign     campaign @relation(fields: [campaign_id], references: [id])
+  lead         lead     @relation(fields: [lead_id], references: [id])
+
+  @@unique([lead_id, campaign_id])
+  @@index([status, category, fetch_times])
+}
+
+model message_refresh_queue {
+  id          Int    @id @default(autoincrement())
+  lead_email  String
+  campaign_id Int
+
+  @@unique([lead_email, campaign_id])
+}
+
+enum CompanyStatus {
+  OPEN_PROSPECT
+  OPPORTUNITY
+  CUSTOMER
+}
+
+model company {
+  id                    Int            @id @default(autoincrement())
+  name                  String
+  url                   String         @unique
+  last_website_activity String?
+  open_roles            Int?
+  last_fundraise        String?
+  primary_location      String?
+  linkedin_url          String?
+  about                 String?
+  domains               String[]
+  is_blacklisted        Boolean        @default(false)
+  status                CompanyStatus?
+  job_batches           job_batch[]
+  leads                 lead[]
+
+  @@index([name])
+}
+
+model company_domain_lead_cursor {
+  id           Int      @id
+  offset       Int      @default(0)
+  has_more     Boolean  @default(false)
+  last_updated DateTime @updatedAt
+}
+
+model job_batch {
+  id         Int      @id @default(autoincrement())
+  company_id Int
+  created_at DateTime @default(now())
+  company    company  @relation(fields: [company_id], references: [id])
+  jobs       job[]
+
+  @@index([company_id])
+  @@index([created_at])
+}
+
+model job {
+  id           Int        @id @default(autoincrement())
+  title        String
+  location     String?
+  department   String?
+  description  String?
+  job_url      String?
+  salary       String?
+  is_active    Boolean    @default(true)
+  job_batch_id Int?
+  job_batch    job_batch? @relation(fields: [job_batch_id], references: [id])
+
+  @@index([job_batch_id])
+  @@index([is_active])
+}
+
+model job_scraping_status {
+  type            String   @id
+  lastProcessedId String?
+  lastRunTime     DateTime
+}
+
+
+model contact {
+    id              Int      @id @default(autoincrement())
+    first_name      String
+    last_name       String
+    email           String   @unique
+    company_domain  String
+    source_provider String
+    linkedin_url    String
+    date_added      DateTime @default(now())
+    log_id          Int      @unique 
+    log             email_api_log @relation(fields: [log_id], references: [id])
+}
+
+model email_api_log {
+    id               Int                      @id @default(autoincrement())
+    provider_name    String
+    found            Boolean
+    is_valid         Boolean
+    created_at       DateTime                 @default(now())
+    contact          contact?                 @relation
+}
+
+
+model email_query_log {
+  id Int @id @default(autoincrement())
+  provider String
+  url         String
+  body        String
+  email       String
+  response    String
+  credit_used Int
+  created_at  DateTime
+  is_valid    Boolean
+}
+
+model email_query_result {
+  id Int @id @default(autoincrement())
+
+  provider String
+  source   String
+
+  email        String
+  fullname     String
+  domain       String
+  linkedin_url String
+  last_update  DateTime
+
+  @@unique([fullname, domain])
+}
+
+model executive {
+  id                 Int      @id @default(autoincrement())
+  fileName           String   @default("")
+  domain             String
+  name               String
+  title              String
+  linkedin           String
+  source             String
+  companyName        String
+  investorReference  String
+  companyReference   String
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model executiveBatchesProcessed {
+  id                Int      @id @default(autoincrement())
+  fileName          String   @unique
+  companyDomains    Int      @default(0)
+  googleSearch      Int      @default(0)
+  crustTitlesSent   Int      @default(0)
+  crustReturns      Int      @default(0)
+  crustMatches      Int      @default(0)
+  leadsPerCompany   Float    @default(0.0)
+  totalLeads        Int      @default(0)
+  createdAt         DateTime @default(now())
+}
+
+model rawCSVFile {
+  id                 Int      @id @default(autoincrement())
+  fileName           String
+  domain             String
+  companyName        String
+  investorReference  String   @default("")
+  companyReference   String   @default("")
 }
