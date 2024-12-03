@@ -1,21 +1,47 @@
 import React from "react";
-import { type ColumnDef } from "@tanstack/react-table";
+import { type Table, type ColumnDef } from "@tanstack/react-table";
 import { type LeadDataTable } from "../../model/table-lead";
 import { DataTableColumnHeader } from "../common/data-table-column-header";
+import { Checkbox } from "~/components/ui/checkbox";
 
 export function getLeadsColumnsHeader(): ColumnDef<LeadDataTable>[] {
   return [
+    {
+      id: "select",
+      enablePinning: true,
+      size: 10,
+      header: ({ table }: { table: Table<LeadDataTable> }) => (
+        <div className="pl-2">
+          <Checkbox
+            // checked={
+            //   table.getIsAllRowsSelected() ||
+            //   (table.getIsSomeRowsSelected() && "indeterminate")
+            // }
+            // onCheckedChange={(checked) =>
+            //   table.toggleAllRowsSelected(!!checked)
+            // }
+            aria-label="Select all"
+            className="translate-y-0.5"
+          />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="pl-2">
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(checked) => row.toggleSelected(!!checked)}
+            aria-label="Select row"
+            className="translate-y-0.5"
+          />
+        </div>
+      ),
+    },
     {
       size: 150,
       accessorKey: "email",
       enableSorting: true,
       header: ({ column }) => {
-        return (
-          <DataTableColumnHeader
-            column={column}
-            title="Email"
-          />
-        );
+        return <DataTableColumnHeader column={column} title="Email" />;
       },
       cell: ({ row }) => <div>{row.getValue("email")}</div>,
     },
@@ -24,12 +50,7 @@ export function getLeadsColumnsHeader(): ColumnDef<LeadDataTable>[] {
       accessorKey: "name",
       enableSorting: true,
       header: ({ column }) => {
-        return (
-          <DataTableColumnHeader 
-            column={column} 
-            title="Name" 
-          />
-        );
+        return <DataTableColumnHeader column={column} title="Name" />;
       },
       cell: ({ row }) => {
         const first_name = row.original.first_name ?? "";
@@ -42,12 +63,7 @@ export function getLeadsColumnsHeader(): ColumnDef<LeadDataTable>[] {
       accessorKey: "company",
       enableSorting: true,
       header: ({ column }) => {
-        return (
-          <DataTableColumnHeader 
-            column={column} 
-            title="Company" 
-          />
-        );
+        return <DataTableColumnHeader column={column} title="Company" />;
       },
       cell: ({ row }) => <div>{row.getValue("company")}</div>,
     },
@@ -55,27 +71,17 @@ export function getLeadsColumnsHeader(): ColumnDef<LeadDataTable>[] {
       accessorKey: "last_contacted_at",
       enableSorting: true,
       header: ({ column }) => {
-        return (
-          <DataTableColumnHeader 
-            column={column} 
-            title="Last Contacted" 
-          />
-        );
+        return <DataTableColumnHeader column={column} title="Last Contacted" />;
       },
-      cell: ({ row }) => <div>{row.getValue("last_contacted_at") ?? "-"}</div>
+      cell: ({ row }) => <div>{row.getValue("last_contacted_at") ?? "-"}</div>,
     },
     {
       accessorKey: "created_at",
       enableSorting: true,
       header: ({ column }) => {
-        return (
-          <DataTableColumnHeader 
-            column={column} 
-            title="Created At" 
-          />
-        );
+        return <DataTableColumnHeader column={column} title="Created At" />;
       },
-      cell: ({ row }) => <div>{row.getValue("created_at") ?? "-"}</div>
+      cell: ({ row }) => <div>{row.getValue("created_at") ?? "-"}</div>,
     },
   ];
 }

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { type LeadDataTable } from '../../model/table-lead'
-import { type ColumnDef, useReactTable, getCoreRowModel, type Updater, type PaginationState, getSortedRowModel } from '@tanstack/react-table'
+import { type ColumnDef, useReactTable, getCoreRowModel, type Updater, type PaginationState, getSortedRowModel, getFilteredRowModel, getPaginationRowModel } from '@tanstack/react-table'
 import { getLeadsColumnsHeader } from './table-column'
 import { type PaginationType } from '~/types/common'
 import { DataTable } from '../common/data-table'
@@ -97,8 +97,16 @@ export function LeadTable() {
   const table = useReactTable({
     columns,
     data: sampleData,
+    debugTable: true,
+    enableRowSelection: true,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    autoResetPageIndex: false,
+    state: {
+      pagination: {
+        pageIndex: 0,
+        pageSize: 10
+      }
+    }
   })
 
   return (
