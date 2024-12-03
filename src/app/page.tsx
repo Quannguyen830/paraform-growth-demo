@@ -1,5 +1,5 @@
-import { api, HydrateClient } from "~/trpc/server";
-import { Header } from "~/app/_components/share/header"
+import { HydrateClient } from "~/trpc/server";
+import { Header } from "~/components/common/header"
 
 export interface Lead {
   id: number;
@@ -9,7 +9,7 @@ export interface Lead {
 export default async function HomePage() {
   return (
     <>
-      <Header title="Manage" />
+      <Header title="Home" />
       <HydrateClient>
         {/* {
           allLeads.leads.map((lead) => (

@@ -1,4 +1,4 @@
-import { Header } from "~/app/_components/share/header"
+import { Header } from "~/components/common/header"
 
 export default function LeadPage() {
   return (

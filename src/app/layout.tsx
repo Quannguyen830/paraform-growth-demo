@@ -5,7 +5,7 @@ import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { SidebarProvider } from "~/components/ui/sidebar";
-import { AppSidebar } from "./_components/share/sidebar";
+import { AppSidebar } from "../components/common/sidebar";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -21,11 +21,11 @@ export default function RootLayout({
       <body>
         <TRPCReactProvider>
           <SidebarProvider>
-            <div className="flex min-h-screen">
+            <div className="flex min-h-screen w-full">
               <AppSidebar />
-              <div className="flex flex-1 flex-col">
+              <main className="flex-1 w-full">
                 {children}
-              </div>
+              </main>
             </div>
           </SidebarProvider>
         </TRPCReactProvider>

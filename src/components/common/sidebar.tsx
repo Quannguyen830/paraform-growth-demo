@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Database, PieChart, Terminal, Search, Mail, Archive, Menu, Building2 } from 'lucide-react'
+import { LayoutDashboard, Database, PieChart, Terminal, Search, Mail, Archive, Menu } from 'lucide-react'
 
 import {
   Sidebar,
@@ -13,7 +13,7 @@ import {
   SidebarHeader,
 } from '~/components/ui/sidebar'
 import { cn } from '~/lib/utils'
-import { PrimaryIcon } from "../images/primary-icon"
+import { PrimaryIcon } from "../../app/_components/images/primary-icon"
 
 const routes = [
   {
@@ -22,7 +22,7 @@ const routes = [
   },
   {
     icon: LayoutDashboard,
-    href: '/dashboard',
+    href: '/manage',
   },
   {
     icon: Archive,
