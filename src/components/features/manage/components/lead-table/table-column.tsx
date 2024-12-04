@@ -3,6 +3,8 @@ import { type Table, type ColumnDef } from "@tanstack/react-table";
 import { type LeadDataTable } from "../../model/table-lead";
 import { DataTableColumnHeader } from "../common/data-table-column-header";
 import { Checkbox } from "~/components/ui/checkbox";
+import { api } from "~/trpc/server";
+import { LeadService } from "../../services/service";
 
 export function getLeadsColumnsHeader(): ColumnDef<LeadDataTable>[] {
   return [
@@ -41,7 +43,11 @@ export function getLeadsColumnsHeader(): ColumnDef<LeadDataTable>[] {
       accessorKey: "email",
       enableSorting: true,
       header: ({ column }) => {
-        return <DataTableColumnHeader column={column} title="Email" />;
+        return <DataTableColumnHeader 
+          column={column} 
+          title="Email"
+          suffix={<span className="">({column.getSize()})</span>}
+        />;
       },
       cell: ({ row }) => <div>{row.getValue("email")}</div>,
     },
@@ -65,7 +71,7 @@ export function getLeadsColumnsHeader(): ColumnDef<LeadDataTable>[] {
       header: ({ column }) => {
         return <DataTableColumnHeader column={column} title="Company" />;
       },
-      cell: ({ row }) => <div>{row.getValue("company")}</div>,
+      cell: ({ row }) => <div>{row.getValue("company") ?? "-"}</div>,
     },
     {
       accessorKey: "last_contacted_at",

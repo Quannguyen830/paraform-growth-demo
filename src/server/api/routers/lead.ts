@@ -15,11 +15,22 @@ export const leadRouter = createTRPCRouter({
         id: true,
         first_name: true,
         last_name: true,
+        email: true,
+        company_name: true,
+        created_at: true,
+        last_contacted_at: true,
       },
+      take: 25
     });
+    
+    const formattedLeads = leads.map(lead => ({
+      ...lead,
+      created_at: lead.created_at.toISOString(),
+      last_contacted_at: lead.last_contacted_at?.toISOString() ?? null,
+    }));
 
     return {
-      leads,
+      leads: formattedLeads,
     };
   }),
 });
